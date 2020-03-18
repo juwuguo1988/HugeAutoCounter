@@ -1,18 +1,19 @@
-package cn.hckj.core
+package cn.hckj.core.ui.activity
 
 import android.Manifest
 import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
+import cn.hckj.core.R
+import cn.hckj.core.common.bean.VoiceRecordBean
 import cn.hckj.core.utils.RxPermissionUtils
 import com.iflytek.cloud.SpeechConstant
 import com.iflytek.cloud.SpeechUtility
-import com.google.gson.Gson
 import com.iflytek.cloud.RecognizerResult
 import com.iflytek.cloud.SpeechError
 import com.iflytek.cloud.ui.RecognizerDialogListener
 import com.iflytek.cloud.ui.RecognizerDialog
+import kotlinx.android.synthetic.main.activity_main.*
 
 
 class MainActivity : AppCompatActivity() {
@@ -35,6 +36,7 @@ class MainActivity : AppCompatActivity() {
             )
     }
 
+
     /**
      * 初始化语音识别
      */
@@ -50,8 +52,8 @@ class MainActivity : AppCompatActivity() {
                 if (!isLast) {
                     //解析语音
                     //返回的result为识别后的汉字,直接赋值到TextView上即可
-                    val result = parseVoice(recognizerResult!!.getResultString())
-                    Log.e("MainActivity", "========result=111=======" + result);
+                    val result = VoiceRecordBean.parseVoiceContent(recognizerResult!!.getResultString())
+                    tv_content.text = result
                 }
             }
 
@@ -60,46 +62,5 @@ class MainActivity : AppCompatActivity() {
         })
         //4.显示dialog，接收语音输入
         mDialog.show()
-    }
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-    }
-
-
-    /**
-     * 解析语音json
-     */
-    fun parseVoice(resultString: String): String {
-        val gson = Gson()
-        val voiceBean = gson.fromJson(resultString, Voice::class.java)
-
-        val sb = StringBuffer()
-        val ws = voiceBean.ws
-        for (wsBean in ws!!) {
-            val word = wsBean.cw!![0].w
-            sb.append(word)
-        }
-        return sb.toString()
-    }
-
-    /**
-     * 语音对象封装
-     */
-    inner class Voice {
-
-        var ws: ArrayList<WSBean>? = null
-
-        inner class WSBean {
-            var cw: ArrayList<CWBean>? = null
-        }
-
-        inner class CWBean {
-            var w: String? = null
-        }
     }
 }
